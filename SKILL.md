@@ -34,7 +34,37 @@ Every source lands in `research/<topic>.md` (append as it arrives) with three fi
 
 ## Step 2 — Grilling rounds
 
-Ask the whole frontier each round; each round the user's answers push the frontier outward. Fact-finding stays your job — never ask the user what you could look up yourself; a running sub-agent is an unsettled prerequisite, so only questions downstream of it wait.
+Ask the whole frontier each round; each round the user's answers push the frontier outward. Fact-finding stays your job — never ask the user what you could look up yourself; a running sub-agent is an unsettled prerequisite, so only questions downstream of it wait. No cap on questions per round — the frontier is whatever it is.
+
+### Question format (interactive)
+
+One round = prose layer + one interactive question form (e.g. Hermes' `clarify` tool; any agent's equivalent). The prose layer carries the argument; the form carries only the answers. Structure:
+
+1. **Restate line(s) in prose** — every locked decision from prior rounds, one line each, before the new questions.
+2. **Each question in prose**: a concrete scenario with a real trade-off first — abstract questions ("how big should the buffer be?") don't qualify here. Then any citation the question needs, inline in the prose, tier-labeled (secondary sources marked as reported).
+3. **The form** collects answers: one entry per question, options max 4, the recommended answer listed FIRST (the UI marks it), an "Other" free-text row on every question so the user can escalate a tier or add a thought. The most radical option must be IN the option set — never silently narrow the range.
+4. **Searched-and-absent questions get no options** — they render as an open-ended field (no choices): they want the user's judgment, not a pick from a menu.
+5. **Dependency rule**: a question whose wording depends on an unanswered question stays out of this round's form.
+6. **Degraded path**: on an agent with no interactive form tool, fall back to plain text — `❓ **Qn** - **title**: body` + `➡ recommendation` lines, accepting terse answers ("Q3: a").
+
+Example shape:
+
+```
+(locked: Q14 — research phase is non-blocking.)
+
+❓ **Q15 - buffer size**: when KV budget drops to 6G, a 512K context
+forces q4 quantization — [paper X §4.2] (primary) says the trade-off
+is real.
+
+<form>
+  Q15: ○ (recommended) 256K, no precision hit
+       ○ 512K, accept q4
+       ○ dynamic scheduling, complexity up
+       ○ radical: cut to 128K for headroom
+       ○ Other → free text
+  Q16 (no source — nothing found contradicting): open field
+</form>
+```
 
 - **Citation discipline** — from the first round after research lands, every round carries at least one question that could not exist without a source, with the source named in the question. Cite a secondary source → label it 轉述.
 - **No manufactured tension** — a round may carry zero cited questions when it says why: "no source found contradicts the plan." Depth comes from contradictions; no contradiction, no question.
