@@ -1,5 +1,5 @@
 ---
-name: grill-with-research
+name: grilling-with-research
 description: 整合版 grilling——先落盤有論證的研究，再開始逼問；邊問邊寫 glossary 與 ADR。手動召換。
 disable-model-invocation: true
 ---

@@ -1,4 +1,4 @@
-# grill-with-research
+# grilling-with-research
 
 **Don't grill a plan on memory alone. Read first, then interrogate.**
 
@@ -36,13 +36,13 @@ Finish  Shared understanding confirmed by the user. Nothing acts on it until the
 Drop this folder (or a symlink to it) into your agent's skills directory:
 
 ```bash
-ln -s /path/to/zakk-grilling-thinking ~/.agents/skills/grill-with-research
+ln -s /path/to/grilling-with-research ~/.agents/skills/grilling-with-research
 ```
 
 The skill is user-invoked (`disable-model-invocation: true`) — it never fires on its own, so it costs zero context until you call it:
 
 ```
-/grill-with-research
+/grilling-with-research
 ```
 
 ## The rules it refuses to break
