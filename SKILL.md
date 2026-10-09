@@ -38,7 +38,7 @@ Every source lands in `research/<topic>.md` in the designated run workspace — 
 
 ## Research Layer（runtime routing，ADR-0004）
 
-三條道。搜尋 → 宿主原生搜尋工具（顯式默認、可覆寫；降級序：自建 SearXNG → 廠商免費 key）。已登入的平台 → 平台 CLI（Agent-Reach 路徑）。普通 URL → 下面的階梯。搜尋回傳小結果集；抓取才產生上下文；兩筆預算分開計。
+三條道。搜尋 → 宿主原生搜尋工具（顯式默認、可覆寫；降級序：自建 SearXNG → 廠商免費 key）。已登入的平台 → 平台 CLI——本機已裝 Agent-Reach 時載入 `references/agent-reach.md` 命令卡路由（Twitter/X、B站、Reddit 等）。普通 URL → 下面的階梯。搜尋回傳小結果集；抓取才產生上下文；兩筆預算分開計。
 
 升級階梯——默認最便宜層（HTTP fetch，輸出轉正文 markdown，只回抽取結果）。觸發器：空結果、challenge 頁、登入牆。一次只升一層。升上瀏覽器層時：預設關資源＋擋廣告＋重用 session；單發腳本，不進 per-step loop（每步 loop 在本地 context 預算下是 10⁵ tokens 起跳）。
 
