@@ -104,10 +104,10 @@ def main():
         covered = hit or pat.search(saa_text) or (name == "github" and re.search(r"github", saa_text, re.I))
         if not covered:
             violations.append(f"R2 channel '{name}' — zero sources and no searched-and-absent entry")
-    # R3: five-category report
+    # R3: five-category report (URL pattern OR self-declared Cat field — SKILL.md rule)
     print(f"entries total: {n}")
     for name, pat in CATEGORIES.items():
-        count = sum(1 for e in entries if e["url"] and pat.search(e["url"]))
+        count = sum(1 for e in entries if (e["url"] and pat.search(e["url"])) or CAT_KEYS.get(e["cat"]) == name)
         saa_cover = any(e["saa"] and pat.search(e["heading"] + " " + e["arg"]) for e in entries)
         status = "OK" if (count or saa_cover) else "GAP"
         if status == "GAP":

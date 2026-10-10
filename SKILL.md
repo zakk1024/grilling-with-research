@@ -98,7 +98,7 @@ The moment a term is resolved, write it to `CONTEXT.md`; the moment a decision c
 - `CONTEXT.md` is a glossary and nothing else — no implementation details. `research/` is the evidence store; keep the two apart.
 - **ADR only when all three hold:** hard to reverse, surprising without context, the result of a real trade-off. Any missing → skip the ADR.
 
-## 驗證紀律（多尺場次適用的常駐規則）
+## 驗證紀律（多尺場次適用的常駐規則，10 條）
 
 逼問場裡有多個獨立執行者（人或 agent）跑量測時：
 
