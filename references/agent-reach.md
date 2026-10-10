@@ -28,5 +28,6 @@ CLI 失敗（反爬、封號、上遊停更）→ 一次升一層照 SKILL.md �
 
 ## 驗證記錄
 
-- 2026-10-10：`bili search --type video` 實測返回真實結果（run workspace `.scratch/agent-reach/`）。`twitter` CLI 已裝、Cookie 未配置——配置後首次使用需再驗。
+- 2026-10-10：`bili search --type video` 實測返回真實結果（run workspace `.scratch/agent-reach/`）。`twitter status`／`tweet`／`user-posts` 實測通（小號 @Cybernightmare3 認證 OK）。
+- **`twitter search` 已知 404**：twitter-cli 0.8.5 的 ClientTransaction init 失敗（上游議題）。搜索期間改用組合：Exa/內建 web_search `site:x.com` 找推文 URL → `twitter tweet <url>` 讀全文；或 `twitter user-posts <user>` 讀第一手發言。上游修復後升級 `uv tool upgrade twitter-cli` 再驗。
 - 安裝釘定：uv tool install --from `archive/94f06c1.zip`（Agent-Reach v1.5.0）。
