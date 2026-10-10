@@ -44,6 +44,8 @@ Every source lands in `research/<topic>.md` in the designated run workspace — 
 
 環境事實先實測再引用——建議依賴「本機有 X」時，先測（which／config／實 call），測試輸出留檔進 `research/`。
 
+**Scrapling 觸發規則（ADR-0006 裁決，執行腳本預先寫死，觸發當場不再決策）**：平时不裝、不常駐。三種情況才升上來裝：抓取回空內容、challenge 頁、登入牆。執行腳本：`uv tool install "scrapling[all]"` → `scrapling install`（它拉自己的瀏覽器依賴，不復用本機 playwright）→ MCP 掛 `scrapling-mcp`（stdio）。PyPI 裝法要顯式鎖 `scrapling` 本名（山寨名在隔壁）。驗證看內容，不只看狀態碼——它會靜默失敗（回 200 但內容空）。enterprise Cloudflare 是天花板，升到頂也繞不過。
+
 ## Step 2 — Grilling rounds
 
 Ask the whole frontier each round; each round the user's answers push the frontier outward. Fact-finding stays your job — never ask the user what you could look up yourself; a running sub-agent is an unsettled prerequisite, so only questions downstream of it wait. No cap on questions per round — the frontier is whatever it is.
