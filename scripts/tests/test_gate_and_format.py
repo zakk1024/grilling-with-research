@@ -44,14 +44,14 @@ CASES = [
     ]),
     ("T1-2c Cat field on atypical domains (spec expectation)", FIXTURES / "fixture-test-c-cat", 0, [
         # Spec (SKILL.md Step 1): 性質用可選 Cat 欄自報（paper/docs/code/community），
-        # 腳本才數得到非典型網域。Expectation below encodes the SPEC, not the bug.
-        # FINDING: docs side passes only because playwright.dev matches the URL
-        # pattern (.dev\b); Cat: paper on openreview.net is NOT counted because
-        # CAT_KEYS (line 68) is dead code — parsed into e['cat'], never consulted
-        # by the R3 loop. So the papers GAP below is a real script bug.
+        # 腳本才數得到非典型網域。Verdict (dig half-layer, 2026-10-11): CAT_KEYS
+        # IS consulted by the R3 loop (`or CAT_KEYS.get(e['cat']) == name`) — the
+        # earlier 'dead code' note was wrong. docs side counts playwright.dev via
+        # the URL pattern; papers side counts openreview.net via CAT_KEYS. Both
+        # assertions below are real and pass.
         ("docs category counts playwright.dev entry (via URL pattern, not Cat)",
          "OK   official docs/specs: 1"),
-        ("papers category counts Cat: paper on atypical domain (SPEC — script FAILS this)",
+        ("papers category counts Cat: paper on atypical domain (via CAT_KEYS)",
          "OK   papers (arXiv etc.): 1"),
         ("gate PASSES per spec", "GATE: PASS"),
     ]),

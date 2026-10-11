@@ -6,7 +6,7 @@
 - Cat: docs
 - Argument: official docs constrain decision X.
 
-## Paper on atypical domain with Cat: paper (FINDING: Cat is parsed but CAT_KEYS is never used by the script — this entry is NOT counted in the papers category; see report)
+## Paper on atypical domain with Cat: paper (counted via CAT_KEYS — verified live 2026-10-11, the earlier 'dead code' FINDING was wrong)
 - URL: https://openreview.net/forum?id=abc123
 - Tier: primary
 - Cat: paper

@@ -5,9 +5,8 @@ The agency skill embeds a verbatim COPY of the source-of-truth rules (COPY-START
 to COPY-END). If they drift, the copy is stale and dispatch must not run.
 
 Copy rule (what counts as copied): the skeleton's Step 1 paragraph lines
-(the paragraph after '## Step 1 — Research (the gate)' heading up to the next
-blank line), the mandatory-coverage paragraph, the machine-format paragraph,
-the searched-and-absent paragraph, and the three Research Layer paragraphs.
+(the paragraphs between the '## Step 1 — Research (the gate)' heading and the
+next heading), plus every Research Layer paragraph.
 
 Usage: python3 check_rule_copy.py
 Exit 0 = copy in sync. Exit 1 = drift (diff printed).
@@ -16,8 +15,10 @@ import re
 import sys
 from pathlib import Path
 
-SKELETON = Path("/Users/zakk/.hermes/profiles/naval/skills/grilling-with-research/SKILL.md")
-AGENCY = Path("/Users/zakk/.hermes/profiles/naval/skills/agency-agents-thinking-grill/SKILL.md")
+# ADR-0004: one convergence anchor. The skeleton resolves by self-location (this
+# script lives in the skeleton repo); the overlay is the workspace repo's SKILL.md.
+SKELETON = Path(__file__).resolve().parent.parent / "SKILL.md"
+AGENCY = Path("/Users/zakk/Desktop/Naval/Agency-agents thinking grill/SKILL.md")
 
 
 def paragraphs(path, lo=None, hi=None):
@@ -52,8 +53,9 @@ def main():
     # copyable = Step 1 paragraphs (minus Step-0 plumbing lines) + every Research Layer paragraph.
     step1 = []
     skel_text = SKELETON.read_text(encoding="utf-8")
-    s1 = skel_text[skel_text.find("## Step 1 — Research"):]
-    s1 = s1[:s1.find("## Step 2")]
+    s1_start = skel_text.find("## Step 1 — Research")
+    nxt = skel_text.find("\n## ", s1_start + 1)  # stop at the next heading — Step 1 is
+    s1 = skel_text[s1_start:nxt if nxt >= 0 else len(skel_text)]  # followed by Research Layer, not Step 2 (ADR run 2 audit #4)
     step1 += [p.strip() for p in re.split(r"\n\s*\n", s1)
               if p.strip() and not p.startswith("#")
               and not p.startswith("Then add") and not p.startswith("Done when:")]
