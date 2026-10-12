@@ -11,14 +11,17 @@ next heading), plus every Research Layer paragraph.
 Usage: python3 check_rule_copy.py
 Exit 0 = copy in sync. Exit 1 = drift (diff printed).
 """
+import os
 import re
 import sys
 from pathlib import Path
 
-# ADR-0004: one convergence anchor. The skeleton resolves by self-location (this
+# ADR-0007: one convergence anchor. The skeleton resolves by self-location (this
 # script lives in the skeleton repo); the overlay is the workspace repo's SKILL.md.
+# NOTE: external users — change this to your local overlay path, or set the
+# AGENCY_SKILL_DIR env var to it (ADR-0005: 外部使用者改這裡／設 env).
 SKELETON = Path(__file__).resolve().parent.parent / "SKILL.md"
-AGENCY = Path("/Users/zakk/Desktop/Naval/Agency-agents thinking grill/SKILL.md")
+AGENCY = Path(os.environ.get("AGENCY_SKILL_DIR", "/Users/zakk/Desktop/Naval/Agency-agents thinking grill/SKILL.md"))  # 本機默認值
 
 
 def paragraphs(path, lo=None, hi=None):
