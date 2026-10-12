@@ -24,8 +24,16 @@ SKELETON = Path(__file__).resolve().parent.parent / "SKILL.md"
 AGENCY = Path(os.environ.get("AGENCY_SKILL_DIR", "/Users/zakk/Desktop/Naval/Agency-agents thinking grill/SKILL.md"))  # 本機默認值
 
 
+def read_text_checked(path):
+    # A3.1: nonexistent input paths go through the script's own SYNC FAIL
+    # message path (clean message + exit 1), not a raw FileNotFoundError traceback.
+    if not path.is_file():
+        sys.exit(f"SYNC FAIL: input file not found: {path}")
+    return path.read_text(encoding="utf-8")
+
+
 def paragraphs(path, lo=None, hi=None):
-    text = path.read_text(encoding="utf-8")
+    text = read_text_checked(path)
     if lo:
         i = text.find(lo)
         if i < 0:
@@ -55,7 +63,7 @@ def main():
     # reverse direction: every copyable rule paragraph in the skeleton must be in the copy.
     # copyable = Step 1 paragraphs (minus Step-0 plumbing lines) + every Research Layer paragraph.
     step1 = []
-    skel_text = SKELETON.read_text(encoding="utf-8")
+    skel_text = read_text_checked(SKELETON)
     s1_start = skel_text.find("## Step 1 — Research")
     nxt = skel_text.find("\n## ", s1_start + 1)  # stop at the next heading — Step 1 is
     s1 = skel_text[s1_start:nxt if nxt >= 0 else len(skel_text)]  # followed by Research Layer, not Step 2 (ADR run 2 audit #4)
@@ -65,7 +73,7 @@ def main():
     rl = skel_text[skel_text.find("## Research Layer"):]
     rl = rl[:rl.find("\n## ")]
     step1 += [p.strip() for p in re.split(r"\n\s*\n", rl) if p.strip() and not p.startswith("#")]
-    copy_text = AGENCY.read_text(encoding="utf-8")
+    copy_text = read_text_checked(AGENCY)
     ci = copy_text.find("COPY-START"); cj = copy_text.find("COPY-END")
     if ci < 0 or cj < 0:
         sys.exit("SYNC FAIL: COPY-START/COPY-END markers missing in agency SKILL.md")

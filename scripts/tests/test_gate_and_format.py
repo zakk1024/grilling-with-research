@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""T1 mechanical tests for check_research_gate.py (grilling-with-research).
+"""T1/T3 mechanical tests for check_research_gate.py + check_rule_copy.py
+(grilling-with-research).
 
 Re-runnable: python3 test_gate_and_format.py [--report PATH]
 Runs existing fixtures A/B/C plus three new machine-format fixtures
@@ -8,12 +9,14 @@ test-c Cat field classification on atypical domains), checks each against
 its expected exit code and expected output assertions, and appends per-case
 results to the report file as it goes.
 """
+import os
 import subprocess
 import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent          # scripts/tests
 SCRIPT = HERE.parent / "check_research_gate.py"  # existing script (read-only)
+RULE_COPY = HERE.parent / "check_rule_copy.py"   # A3.1: rule-copy checker (fixture cases below)
 FIXTURES = HERE / "fixtures"                    # new fixtures
 OLD_FIXTURES = HERE.parent / "fixtures"         # existing fixtures (read-only)
 
@@ -55,15 +58,30 @@ CASES = [
          "OK   papers (arXiv etc.): 1"),
         ("gate PASSES per spec", "GATE: PASS"),
     ]),
+    # A3.1 fixtures for check_rule_copy.py's missing-input-path rule (must-FAIL + must-PASS).
+    ("T3-1a rule_copy: nonexistent input path -> clean SYNC FAIL (no traceback)",
+     FIXTURES / "fixture-test-d-nonexistent-path" / "does-not-exist.md", 1,
+     [("clean SYNC FAIL message on missing input file", "SYNC FAIL: input file not found"),
+      ("no raw FileNotFoundError traceback", "!Traceback")], True),
+    ("T3-1b rule_copy: existing synced copy still PASSes (must-PASS fixture)",
+     FIXTURES / "fixture-test-e-synced-copy" / "SKILL.md", 0,
+     [("must PASS sync", "SYNC: PASS")], True),
 ]
 
 
-def run_case(report_path, case_id, fixture_dir, expected_exit, assertions):
+def run_case(report_path, case_id, fixture_dir, expected_exit, assertions, via_env=False):
+    if via_env:
+        cmd = [sys.executable, str(RULE_COPY)]
+        env = dict(os.environ, AGENCY_SKILL_DIR=str(fixture_dir))
+        cmd_str = f"AGENCY_SKILL_DIR={fixture_dir} python3 {RULE_COPY}"
+    else:
+        cmd = [sys.executable, str(SCRIPT), str(fixture_dir)]
+        env = None
+        cmd_str = f"python3 {SCRIPT} {fixture_dir}"
     print(f"\n{'=' * 70}\n{case_id}\nfixture: {fixture_dir}\n"
-          f"command: python3 {SCRIPT} {fixture_dir}\n"
+          f"command: {cmd_str}\n"
           f"expected exit: {expected_exit}")
-    r = subprocess.run([sys.executable, str(SCRIPT), str(fixture_dir)],
-                       capture_output=True, text=True)
+    r = subprocess.run(cmd, capture_output=True, text=True, env=env)
     print(f"actual exit:   {r.returncode}")
     print("--- stdout ---")
     print(r.stdout.rstrip())
@@ -74,8 +92,15 @@ def run_case(report_path, case_id, fixture_dir, expected_exit, assertions):
     ok = r.returncode == expected_exit
     checks.append((f"exit code == {expected_exit}", ok, f"got {r.returncode}"))
     for desc, needle in assertions:
-        ok2 = needle in r.stdout
-        checks.append((desc, ok2, "found" if ok2 else "NOT FOUND in stdout"))
+        # A3.1: needles are checked against stdout+stderr combined (SYNC FAIL messages
+        # go to stderr via sys.exit); a leading "!" means the needle must be ABSENT.
+        if needle.startswith("!"):
+            ok2 = needle[1:] not in (r.stdout + r.stderr)
+            detail = "absent" if ok2 else "PRESENT"
+        else:
+            ok2 = needle in (r.stdout + r.stderr)
+            detail = "found" if ok2 else "NOT FOUND in stdout/stderr"
+        checks.append((desc, ok2, detail))
     for desc, ok2, detail in checks:
         print(f"  [{'PASS' if ok2 else 'FAIL'}] {desc} — {detail}")
     case_pass = all(c[1] for c in checks)
@@ -83,7 +108,7 @@ def run_case(report_path, case_id, fixture_dir, expected_exit, assertions):
     with report_path.open("a", encoding="utf-8") as f:
         f.write(f"\n## {case_id}\n\n")
         f.write(f"- fixture: `{fixture_dir}`\n")
-        f.write(f"- command: `python3 {SCRIPT} {fixture_dir}`\n")
+        f.write(f"- command: `{cmd_str}`\n")
         f.write(f"- expected exit code: {expected_exit}; actual: {r.returncode}\n\n")
         f.write("```\n$ python3 check_research_gate.py "
                 f"{fixture_dir}\n{r.stdout.rstrip()}\n```\n\n")
