@@ -60,13 +60,15 @@ The skill is user-invoked (`disable-model-invocation: true`) — it never fires 
 
 The grilling loop, domain-modeling discipline, and skill-writing principles come from [Matt Pocock's skills](https://github.com/mattpocock/skills) (pinned at v1.2.2). The research gate — argued citations, consumption-based gate, searched-and-absent records — is the new organ.
 
-## 外部使用者安裝須知（機器依賴三處＋第一步）
+## 外部使用者安裝須知（機器依賴四處＋第一步）
 
-clone 後不改任何东西就跑的前提是這三處本機寫死點已被你接管：
+clone 後不改任何东西就跑的前提是這四處本機寫死點已被你接管：
 
 1. **Roster 真相源** ＝本機 plugin `data/agents.json`（ADR-0001 寫死）——外部環境要換成你自己的 roster 來源。
 2. **閘門查表** ＝本機模型映射（ADR-0003 寫死；本機無數據格是理論值）——按你的實際執行檔位重寫。
 3. **AGENCY 錨點** ＝`scripts/check_rule_copy.py` 的 AGENCY 常數——外部使用者改這裡，或設 env `AGENCY_SKILL_DIR` 指向你本機的 overlay SKILL.md（預設值是本機默認值；ADR-0005／ADR-0007）。
+
+4. **SKILL.md Step 0 預設落盤路徑**＝SKILL.md 內寫死的設計區路徑＝本機事實——外部使用者改指自己的 workspace。
 
 安裝後第一步：跑 `python3 scripts/check_rule_copy.py`（骨架根目錄）——退出碼 0 ＝規則副本同步、可開工。ADR 檔案本體與字彙表住 overlay repo（ADR-0007：單一道真相源）。
 
