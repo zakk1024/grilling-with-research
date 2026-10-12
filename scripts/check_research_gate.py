@@ -26,7 +26,7 @@ SAA_HEADING = re.compile(r"searched[- ]and[- ]absent", re.I)
 
 CHANNELS = {
     "github": re.compile(r"github\.com", re.I),
-    "hn": re.compile(r"news\.ycombinator\.com", re.I),
+    "hn": re.compile(r"news\.ycombinator\.com|hn\.algolia\.com", re.I),
     "reddit": re.compile(r"reddit\.com", re.I),
 }
 CATEGORIES = {
@@ -45,6 +45,12 @@ def parse_entries(text):
     blocks = re.split(r"^#{2,3} ", text, flags=re.M)
     for b in blocks[1:]:
         heading, _, body = b.partition("\n")
+        if SAA_HEADING.search(heading):
+            # searched-and-absent blocks are the fifth category — the fixed
+            # query/where/result body IS the entry; field lines don't apply.
+            entries.append({"heading": heading.strip(), "url": None, "tier": "searched-and-absent",
+                            "arg": body.strip(), "cat": "", "unread": False, "saa": True})
+            continue
         url = FIELD_URL.search(body)
         tier = FIELD_TIER.search(body)
         arg = FIELD_ARG.search(body)
