@@ -50,6 +50,10 @@ Every source lands in `research/<topic>.md` in the designated run workspace — 
 
 Ask the whole frontier each round; each round the user's answers push the frontier outward. Fact-finding stays your job — never ask the user what you could look up yourself; a running sub-agent is an unsettled prerequisite, so only questions downstream of it wait. No cap on questions per round — the frontier is whatever it is.
 
+### 审核官 pass（问题端给用户之前）
+
+第一轮端给用户前，问题草稿落盘到 `.scratch/<feature>/`，派一个独立审核官（选零执行角色：只读＋只写自己的报告档，增量落盘，工具预算 ≤12）。审核官必须回 research/ 原始檔核對 argument 欄，不轻信草稿的转述；逐题核——情境有真实 trade-off、引用带 tier 且属实、选项互斥、pros/cons 双全、最激进选项在桌上、依赖未答的问题没偷跑、s-a 题不给选项、承重断言有盘上锚点。审核官交逐题 PASS/FIX＋至少 3 个失败向量＋总判；FIX 的修改落回草稿文件才算过，口头修不算。
+
 ### Question format (interactive)
 
 One round = prose layer + one interactive question form (e.g. Hermes' `clarify` tool; any agent's equivalent). The prose layer carries the argument; the form carries only the answers. Structure:
@@ -98,7 +102,7 @@ The moment a term is resolved, write it to `CONTEXT.md`; the moment a decision c
 - `CONTEXT.md` is a glossary and nothing else — no implementation details. `research/` is the evidence store; keep the two apart.
 - **ADR only when all three hold:** hard to reverse, surprising without context, the result of a real trade-off. Any missing → skip the ADR.
 
-## 驗證紀律（多尺場次適用的常駐規則，10 條）
+## 驗證紀律（多尺場次適用的常駐規則，12 條）
 
 逼問場裡有多個獨立執行者（人或 agent）跑量測時：
 
@@ -114,6 +118,11 @@ The moment a term is resolved, write it to `CONTEXT.md`; the moment a decision c
 - **區間切片切在下一個標題邊界，不切在具名錨點**——中間可能被插入新節，重複計入會讓報數說謊（裁決可能對但數字不可信）；報數是別人唯一敢信的東西。
 - **聲稱「已落地／已補齊」之前先看盤**——先 commit 再報 hash，先 `git status` 乾淨再報連跑成績；話講在實物前面就是順序債，同一形態犯兩次就要升級成常駐規則。
 - **「補齊／對齊」類工單要雙向核**——改完從兩個方向各數一次差集（A−B 與 B−A），單邊補齊不算補齊。
+- **承重斷言端上問題前要有盤上錨點**——只有對話記憶撐著的事實會被審核官第一個踢掉（它查不到落盤處就判 FIX）；session 內部做過的事先補錨再引用——派工紀錄可 grep delegation transcript（`~/.hermes/profiles/<profile>/cache/delegation/live/deleg_*/task-*.log` 含派工角色與簡報），補不了就在題面標「未錨定」並降低其承重。
+- **預測複合數要拆構成寫**——預測「變更後」的計數要把存量與新增分別預測；只寫總數＝隱含假設新料自帶乾淨，上游自己產髒時預測即落空。落空時報告要能從構成份解釋缺口，照記不改寫。
+- **不可復現的事件評 CONSISTENT，不蓋 VERIFIED**——「寫入恰好發生／恰好觸碰 N 檔」這類一次性事件，覆核者無法復跑復現，只能判「與自報一致、無反證」；覆核者拒蓋 VERIFIED 章是正確行為，採納。
+- **沒驗過 hash 的備份是檔案不是備份**——寫入者的備份要驗兩件：備份檔在盤上實存、復算 sha256 對得上寫入前記錄；寫入前狀態若只存在於無 git 的活目錄，備份要入 git 才算保住。
+- **讀取方式 umbrella 標注＝半步走樣**——umbrella「全文直讀」蓋住 changed-files 清單或 API 聚合等不同讀法時，逐條寫各自讀取方式，別一括；tier 屬實但讀法描述誇大一樣會被審核打回。
 
 ## Finish
 
