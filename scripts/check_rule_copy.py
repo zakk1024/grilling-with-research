@@ -21,7 +21,36 @@ from pathlib import Path
 # NOTE: external users — change this to your local overlay path, or set the
 # AGENCY_SKILL_DIR env var to it (ADR-0005: 外部使用者改這裡／設 env).
 SKELETON = Path(__file__).resolve().parent.parent / "SKILL.md"
-AGENCY = Path(os.environ.get("AGENCY_SKILL_DIR", "/Users/zakk/Desktop/Naval/Agency-agents thinking grill/SKILL.md"))  # 本機默認值
+
+
+def _discover_agency():
+    """可攜解析（portable-agency-default 分支）。
+
+    行為對照：
+      舊（單行字面值）：AGENCY 恆為 macOS 路徑——env 未設時，非 macOS 機直接
+        SYNC FAIL「input file not found」。
+      新：env AGENCY_SKILL_DIR 優先（行為不變）→ 家目錄常見 skills 佈局按名
+        搜尋（.hermes/skills、.hermes/profiles/*/skills、桌面/桌面 Skills/
+        Desktop Skills）→ 都沒有才退回舊 macOS 字面值（原處境行為不變）。
+    """
+    env = os.environ.get("AGENCY_SKILL_DIR")
+    if env:
+        return Path(env)
+    name = "agency-agents-thinking-grill"
+    home = Path.home()
+    for cand in (
+        home / ".hermes" / "skills" / name / "SKILL.md",
+        *sorted(home.glob(".hermes/profiles/*/skills/%s/SKILL.md" % name)),
+        home / "桌面" / "Skills" / name / "SKILL.md",
+        home / "Desktop" / "Skills" / name / "SKILL.md",
+        home / "skills" / name / "SKILL.md",
+    ):
+        if cand.is_file():
+            return cand
+    return Path("/Users/zakk/Desktop/Naval/Agency-agents thinking grill/SKILL.md")
+
+
+AGENCY = _discover_agency()  # env 優先 → 家目錄按名搜尋 → macOS 字面值 fallback
 
 
 def read_text_checked(path):
