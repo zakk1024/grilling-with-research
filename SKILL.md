@@ -26,7 +26,7 @@ Done when: every `docs/agents/*.md` above exists (minus skipped sections) and th
 
 Before the first round, enumerate every open decision that outside evidence could bear on. Then: one open question, one sub-agent dispatch. Each dispatch must return sources with **URLs** — a conclusion without a verifiable URL is marked unverified and never enters a question.
 
-Every source lands in `research/<topic>.md` in the designated run workspace — glossary, ADRs, and research deliverables all live in one repo; a reference must never point across a repo at something that can move. Only when no workspace is designated does it land in the skill's own repo（本機預設，外部使用者改指自己的 workspace）. Append as it arrives, with three fields — **URL**, **tier** (primary: papers (arXiv etc.), specs/official docs, the code itself, first-person community posts (GitHub issues/discussions, HN/Reddit OPs & comments — the author reporting their own run) / secondary: blogs, retellings, aggregator summaries), and **argument**: one line on which open decision it bears on and how — which known trade-off it supports or contradicts. A citation without an argument has not landed. A source carries a decision only after full extraction; snippet-only sources stay secondary, labelled 未讀全文.
+Every source lands in `research/<topic>.md` in the designated run workspace — glossary, ADRs, and research deliverables all live in one repo; a reference must never point across a repo at something that can move. Only when no workspace is designated does it land in the skill's own repo（本機預設，外部使用者改指自己的 workspace）. Append as it arrives, with three fields — **URL**, **tier** (primary: papers (arXiv etc.), specs/official docs, the code itself, first-person community posts (GitHub issues/discussions, HN/Reddit OPs & comments — the author reporting their own run) / secondary: blogs, retellings, aggregator summaries), and **argument**: one line on which open decision it bears on and how — which known trade-off it supports or contradicts. A citation without an argument has not landed. A source carries a decision only after full extraction; snippet-only sources stay secondary, labelled 未讀全文. **對宣稱型內容，先找 vendor 自己最硬的自認文件再定案**——模型卡／README 宣稱「支援 X」時，抓同 repo 的 DEPLOY/INSTALL 文件全文驗證：卡面行銷常寫設計意圖，部署文件會寫「validation status / not yet loaded」的實情；兩者矛盾時以部署文件為準。
 
 **必搜範圍（mandatory coverage）**：每次運行的研究範圍必須包含 GitHub（repo/issues/discussions）、HN、Reddit 三個管道——各至少一條來源，或一條 searched-and-absent。五類第一層（論文／官方文件／代碼／社群親身發言／searched-and-absent）逐類清點，缺哪類補哪類或留 absents 記錄。管道按來源網域數，類別按來源性質數——性質用可選 `Cat:` 欄自報（paper/docs/code/community），腳本才數得到非典型網域（如 playwright.dev 屬官方文件）。無 pytest 也可直跑（受支持路徑）：測試腳本 self-contained，直接 `python3 scripts/tests/test_gate_and_format.py` 跑即可。開場前跑 `scripts/check_research_gate.py <research_dir>`——腳本退出碼 0 才開第一輪。腳本本身要先過 fixture 自測（每條規則至少一個必 FAIL 的 fixture＋一個必 PASS）；它對真實數據報 FAIL 時，先跑 fixture 分清是腳本 bug 還是數據真有洞，再動數據。
 
@@ -43,6 +43,8 @@ Every source lands in `research/<topic>.md` in the designated run workspace — 
 升級階梯——默認最便宜層（HTTP fetch，輸出轉正文 markdown，只回抽取結果）。觸發器：空結果、challenge 頁、登入牆。一次只升一層。升上瀏覽器層時：預設關資源＋擋廣告＋重用 session；單發腳本，不進 per-step loop（每步 loop 在本地 context 預算下是 10⁵ tokens 起跳）。
 
 環境事實先實測再引用——建議依賴「本機有 X」時，先測（which／config／實 call），測試輸出留檔進 `research/`。
+
+**大 checkpoint 下載優化（多檔 manifest 場景）**：先拉 Hub tree API 比對兩 revision 的 LFS oid 差集——相同 shard 用本機已有副本 hardlink（零拷貝），只下載真差異檔；aria2c 細節與坑見 [references/checkpoint-download.md](references/checkpoint-download.md)。
 
 **Scrapling 觸發規則（ADR-0006 裁決，執行腳本預先寫死，觸發當場不再決策）**：平时不裝、不常駐。三種情況才升上來裝：抓取回空內容、challenge 頁、登入牆。執行腳本：`uv tool install "scrapling[all]"` → `scrapling install`（它拉自己的瀏覽器依賴，不復用本機 playwright）→ MCP 掛 `scrapling-mcp`（stdio）。PyPI 裝法要顯式鎖 `scrapling` 本名（山寨名在隔壁）。驗證看內容，不只看狀態碼——它會靜默失敗（回 200 但內容空）。enterprise Cloudflare 是天花板，升到頂也繞不過。
 
@@ -87,7 +89,7 @@ is real.
 - **Citation discipline** — from the first round after research lands, every round carries at least one question that could not exist without a source, with the source named in the question. Cite a secondary source → label it 轉述.
 - **No manufactured tension** — a round may carry zero cited questions when it says why: "no source found contradicts the plan." Depth comes from contradictions; no contradiction, no question.
 - **Restate before advancing** — after each confirmation, restate the locked decision in one line, so the transcript is self-verifying. Terse answers ("Q3: a") are normal.
-- **Propagate corrections** — when the user corrects an earlier fact, explicitly revise every inference built on the old one and record the correction.
+- **Propagate corrections** — when the user corrects an earlier fact, explicitly revise every inference built on the old one and record the correction. Same applies to **mid-run new evidence** that contradicts a conclusion already stated to the user: revise the prose conclusion AND the `research/` file it rests on in the same turn — the research store must never keep a「後續被自身其他來源推翻」的條目，下輪 specialist 讀到舊結論又重蹈.
 - **Label proposals honestly** — items the user confirmed verbatim vs items you proposed unchallenged: mark the latter *revisable* so they don't harden into decisions.
 - **Doc hygiene** — read CONTEXT.md/ADR files before writing; patch, never overwrite — sibling sessions may be editing the same file.
 
